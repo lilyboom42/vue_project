@@ -4,7 +4,7 @@
       Ajouter une Tâche
     </button>
 
-    <!-- <div v-if="showForm" class="mb-4"> -->
+    <div v-if="showForm" class="mb-4">
       <hr class="my-4">
       <form @submit.prevent="submitTask">
         <div class="mb-4">
@@ -23,10 +23,11 @@
         <button type="button" @click="cancelAddTask" class="bg-gray-500 text-white font-bold py-2 px-4 rounded w-full">Annuler</button>
       </form>
     </div>
-
+  </div>
 </template>
 
 <script>
+import { useTasksStore } from '@/stores/tasks';
 export default {
   data() {
     return {
@@ -42,20 +43,25 @@ export default {
     showAddTaskForm() {
       this.showForm = true;
     },
-    cancelAddTask() {
-      this.showForm = false;
-      this.newTask.name = '';
-      this.newTask.description = '';
-      this.newTask.date = '';
-    },
+    // cancelAddTask() {
+    //   this.showForm = false;
+    //   this.newTask.name = '';
+    //   this.newTask.description = '';
+    //   this.newTask.date = '';
+    // },
     submitTask() {
-      this.$emit('task-added', { ...this.newTask });
-      this.cancelAddTask();
+      if (this.newTask.name && this.newTask.description && this.newTask.date) {
+        this.newTask.id = Date.now();
+        useTasksStore().create(this.newTask)
+        this.$router.push({name:'TaskList'});
+      } else {
+        alert('Veuillez remplir tous les champs.');
+      }
     }
-    
   }
 };
 </script>
 
 <style scoped>
+/* Ajoutez des styles ici si nécessaire */
 </style>

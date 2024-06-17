@@ -1,6 +1,6 @@
 <template>
   <div v-if="show">
-    <h2>Modifier la Tâche</h2>
+    <h2>Modifier la tâche {{ task.id }}</h2>
     <form @submit.prevent="updateTask">
       <input v-model="task.name" placeholder="Nom de la tâche" required />
       <textarea v-model="task.description" placeholder="Description"></textarea>
@@ -10,52 +10,47 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, defineProps, defineEmits, watch } from 'vue';
+import { useTasksStore } from '@/stores/tasks';
+import { useRouter } from 'vue-router';
 
+const store = useTasksStore();
+const router = useRouter();
 
-import { ref, watch } from 'vue';
+const props = defineProps({
+  newTask: {
+    type: Object,
+    required: true
+  }
+});
 
-// import { store } from '../store';
-export default {
-  setup(props) {
-    const count = ref(0)
-    console.log(props.task);
-    // expose la variable count dans le template
-    // et dans tous les autres hooks de l'Options API
-    return {
-      count
+const emit = defineEmits(['update-task']);
+
+const show = ref(true);
+const task = ref({ id: null, name: '', description: '', date: '' });
+
+watch(
+  () => props.newTask,
+  (newTask) => {
+    if (newTask) {
+      show.value = true;
+      task.value = { ...newTask };
     }
   },
-  props: ['newTask'],
-  data() {
-    return {
-      show: false,
-      task: {
-        id: null,
-        name: '',
-        description: '',
-        date: ''
-      }
-    }
-  },
-  created() {
-    // console.log(this.task)
-  },
-  watch: {
-    newTask: {
-      deep: true,
-      handler() {
-        this.show = true
-        this.task = this.newTask
-        // console.log(this.newTask);
-      }
-    }
-  },
-  methods: {
-    updateTask() {
-      console.log(this.task);
-      this.$emit('updateTask', this.task);
-      this.show = false;
-    }
-}}
+  { deep: true, immediate: true }
+);
+
+const updateTask = () => {
+  if (task.value.name && task.value.date) {
+    emit('update-task', task.value);
+    show.value = false;
+  } else {
+    alert('Veuillez remplir tous les champs obligatoires.');
+  }
+};
 </script>
+
+<style scoped>
+/* Styles spécifiques au composant */
+</style>
